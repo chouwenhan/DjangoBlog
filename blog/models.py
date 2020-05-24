@@ -12,6 +12,7 @@ from DjangoBlog.utils import cache_decorator, cache
 from django.utils.timezone import now
 from mdeditor.fields import MDTextField
 
+
 logger = logging.getLogger(__name__)
 
 LINK_SHOW_TYPE = (
@@ -61,6 +62,7 @@ class Article(BaseModel):
     STATUS_CHOICES = (
         ('d', '草稿'),
         ('p', '发表'),
+        ('s', '私人')
     )
     COMMENT_STATUS = (
         ('o', '打开'),

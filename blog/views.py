@@ -16,6 +16,9 @@ from blog.models import Article, Category, Tag, Links
 from comments.forms import CommentForm
 import logging
 
+# extend code
+from DjangoBlog.admin_site import DjangoBlogAdminSite
+
 logger = logging.getLogger(__name__)
 
 
@@ -93,6 +96,10 @@ class IndexView(ArticleListView):
 
     def get_queryset_data(self):
         article_list = Article.objects.filter(type='a', status='p')
+        # extend code
+        if self.request.user.is_superuser:
+            non_public_article_list = Article.objects.filter(type='a', status='s')
+            article_list = article_list.union(non_public_article_list)
         return article_list
 
     def get_queryset_cache_key(self):
@@ -143,9 +150,9 @@ class ArticleDetailView(DetailView):
 
 class CategoryDetailView(ArticleListView):
     '''
-    分类目录列表
+    分類目錄列表
     '''
-    page_type = "分类目录归档"
+    page_type = "分類目錄歸檔"
 
     def get_queryset_data(self):
         slug = self.kwargs['category_name']
@@ -157,6 +164,12 @@ class CategoryDetailView(ArticleListView):
             map(lambda c: c.name, category.get_sub_categorys()))
         article_list = Article.objects.filter(
             category__name__in=categorynames, status='p')
+
+        # extend code
+        if self.request.user.is_superuser:
+            non_public_article_list = Article.objects.filter(
+            category__name__in=categorynames, status='s')
+            article_list = article_list.union(non_public_article_list)
         return article_list
 
     def get_queryset_cache_key(self):
@@ -184,7 +197,7 @@ class AuthorDetailView(ArticleListView):
     '''
     作者详情页
     '''
-    page_type = '作者文章归档'
+    page_type = '作者文章歸檔'
 
     def get_queryset_cache_key(self):
         author_name = self.kwargs['author_name']
@@ -209,7 +222,7 @@ class TagDetailView(ArticleListView):
     '''
     标签列表页面
     '''
-    page_type = '分类标签归档'
+    page_type = '分類標籤歸檔'
 
     def get_queryset_data(self):
         slug = self.kwargs['tag_name']
@@ -241,7 +254,7 @@ class ArchivesView(ArticleListView):
     '''
     文章归档页面
     '''
-    page_type = '文章归档'
+    page_type = '文章歸檔'
     paginate_by = None
     page_kwarg = None
     template_name = 'blog/article_archives.html'
